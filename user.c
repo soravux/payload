@@ -152,7 +152,37 @@ struct GPS_Text processGPS(char* inData)
     return data;
 }
 
-void writeStringToLogger(char *data, int len)
+/* OpenLog related.
+ * Reference: https://github.com/sparkfun/OpenLog/wiki/Command-Set
+ */
+
+void loggerEnterCommandMode()
+{
+    /* Entering 3x CTRL+Z (26) will enter command mode */
+    putcUART2(26);
+    putcUART2(26);
+    putcUART2(26);
+    __delay_ms(5);
+    // TODO: check if mode has been changed.
+    //putcUART2(26);
+}
+
+void loggerLeaveCommandMode()
+{
+    /* In Command Mode, CTRL+Z will return in */
+    putcUART2(26);
+    // TODO: check if mode has been changed.
+}
+
+void loggerChangeFile(char *filename, int len)
+{
+    loggerEnterCommandMode();
+    loggerWriteString("append ", 7);
+    loggerWriteString(filename, len);
+    loggerLeaveCommandMode();
+}
+
+void loggerWriteString(char *data, int len)
 {
     int i;
     for (i = 0; i < len; ++i) {
