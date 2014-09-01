@@ -1,3 +1,5 @@
+#ifndef USER_H
+#define USER_H
 /******************************************************************************/
 /* User Level #define Macros                                                  */
 /******************************************************************************/
@@ -8,7 +10,7 @@
 #define MAGN_ADDRESS  ((int) 0x1E) // 0x1E = 0x3C / 2
 #define GYRO_ADDRESS  ((int) 0x68) // 0x68 = 0xD0 / 2
 
-char i2c_data[10];
+
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */
@@ -62,3 +64,5 @@ struct GPS_Text processGPS(char* inData);
 struct axis getAccelerometer();
 struct axis getMagnetometer();
 struct axis getGyroscope();
+
+#endif

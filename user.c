@@ -35,6 +35,10 @@ char* GPSWPtr = GPSData;
 char* GPSRPtr = GPSData;
 short GPSState = GPS_INVALID;
 
+void initAccelerometer();
+void initMagnetometer();
+void initGyroscope();
+
 void InitApp(void)
 {
     /* Setup analog functionality and port direction */
@@ -101,6 +105,10 @@ void InitApp(void)
     IdleI2C1();
     StartI2C1();
     I2C1_Clear_Intr_Status_Bit;
+
+    initAccelerometer();
+    initMagnetometer();
+    initGyroscope();
 }
 
 struct GPS_Text processGPS(char* inData)
@@ -151,6 +159,11 @@ void writeStringToLogger(char *data, int len)
         putcUART2(data[i]);
     }
 }
+
+/* I2C-related code: IMU, Barometer, etc. */
+/* This definition is here because in the .h it is ends up being defined multiple times */
+char i2c_data[10];
+
 
 /* IMU-related code. Highly inspired by:
  * https://github.com/ptrbrtz/razor-9dof-ahrs/blob/master/Arduino/Razor_AHRS/Sensors.ino
