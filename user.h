@@ -5,9 +5,12 @@
 /******************************************************************************/
 
 // Sensor I2C addresses
-#define ACCEL_ADDRESS ((int) 0x53) // 0x53 = 0xA6 / 2
+/*#define ACCEL_ADDRESS ((int) 0x53) // 0x53 = 0xA6 / 2
 #define MAGN_ADDRESS  ((int) 0x1E) // 0x1E = 0x3C / 2
-#define GYRO_ADDRESS  ((int) 0x68) // 0x68 = 0xD0 / 2
+#define GYRO_ADDRESS  ((int) 0x68) // 0x68 = 0xD0 / 2*/
+#define ACCEL_ADDRESS ((int) 0xA6)
+#define MAGN_ADDRESS  ((int) 0x3C)
+#define GYRO_ADDRESS  ((int) 0xD0)
 
 
 
@@ -64,7 +67,8 @@ void InitApp(void);         /* I/O and Peripheral Initialization */
 
 /* Logger functions */
 
-void loggerWriteString(char *data, int len);
+void loggerWriteMem(char *data, int len);
+void loggerWriteString(char *data, int maxlen);
 
 /* Sensors functions */
 

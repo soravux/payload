@@ -111,13 +111,13 @@ void InitApp(void)
     IEC1bits.SSP1IE = 0;
     OpenI2C1(I2C_MSSP_ENABLE & I2C_MASTER,
              I2C_GEN_CALL_DISABLE & I2C_ACK_ENABLE & I2C_RECEIVE_ENABLE & I2C_STOP_ENABLE & I2C_REP_START_ENABLE & I2C_MASTR_START_ENABLE,
-             159, 0, 0, I2C_SLEW_ON & I2C_SMBUS_DISABLE);
+             39, 0, 0, I2C_SLEW_ON & I2C_SMBUS_DISABLE);
     IdleI2C1();
     I2C1_Clear_Intr_Status_Bit;
 
     initAccelerometer();
-    /*initMagnetometer();
-    initGyroscope();*/
+    initMagnetometer();
+    initGyroscope();
 }
 
 struct GPS_Text processGPS(char* inData)
@@ -191,12 +191,12 @@ void loggerLeaveCommandMode()
 void loggerChangeFile(char *filename, int len)
 {
     loggerEnterCommandMode();
-    loggerWriteString("append ", 7);
-    loggerWriteString(filename, len);
+    loggerWriteMem("append ", 7);
+    loggerWriteMem(filename, len);
     loggerLeaveCommandMode();
 }
 
-void loggerWriteString(char *data, int len)
+void loggerWriteMem(char *data, int len)
 {
     int i, j;
     /*while (BusyUART2());
@@ -205,6 +205,7 @@ void loggerWriteString(char *data, int len)
         while (BusyUART2());
     }*/
 
+    /* Custom bit-banging because polarity of hardware UART is inverted. */
     #define BIT __delay_us(102);
 
     for (j = 0; j < len; ++j) {
@@ -221,7 +222,18 @@ void loggerWriteString(char *data, int len)
         BIT
         BIT
     }
+}
 
+/* Write string (stop when \0 encountered) */
+void loggerWriteString(char *data, int maxlen)
+{
+    int len;
+    for (len = 0; len < maxlen; ++len) {
+        if (data[len] == 0x00) {
+            break;
+        }
+    }
+    loggerWriteMem(data, len);
 }
 
 /* I2C-related code: IMU, Barometer, etc. */

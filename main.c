@@ -60,13 +60,12 @@ int16_t main(void)
         data = getAccelerometer();
         sprintf(buffer, "Accel: %i, %i, %i\n", data.x, data.y, data.z);
         loggerWriteString(buffer, 30);
-        /*data = getMagnetometer();
-        loggerWriteString("\nMagneto: ", 10);
-        loggerWriteString(buffer, 6);
+        data = getMagnetometer();
+        sprintf(buffer, "Magneto: %i, %i, %i\n", data.x, data.y, data.z);
+        loggerWriteString(buffer, 30);
         data = getGyroscope();
-        loggerWriteString("\nGyro: ", 7);
-        loggerWriteString(buffer, 6);*/
-        loggerWriteString("\n", 1);
+        sprintf(buffer, "Gyro: %i, %i, %i\n", data.x, data.y, data.z);
+        loggerWriteString(buffer, 30);
 
         __delay_ms(500);
         Nop();
