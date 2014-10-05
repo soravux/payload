@@ -31,6 +31,7 @@ def plotData(data):
             print(axis)
             plt.plot(axis)
         plt.savefig('{}.png'.format(key))
+        plt.clf()
 
 
 if __name__ == '__main__':
