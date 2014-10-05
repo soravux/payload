@@ -57,7 +57,8 @@ void InitApp(void)
                    UART_TX_INT_DIS);
 
     /* Init GPS */
-    OpenUART1(UART_EN &
+    CloseUART1();
+    /*OpenUART1(UART_EN &
               UART_IDLE_CON &
               UART_DIS_WAKE &
               UART_DIS_LOOPBACK &
@@ -78,7 +79,7 @@ void InitApp(void)
               UART_RX_OVERRUN_CLEAR,
               FCY / (4 * 38400) - 1);               //BRG=0x22 for 115Kbaud
                                    //BRG=0x1A0 for 9600baud
-                                   //BRG=0x010 for 230Kbaud
+                                   //BRG=0x010 for 230Kbaud */
     /* Init SD Card Writer */
     /*OpenUART2(UART_EN &
               UART_IDLE_STOP &
@@ -102,18 +103,20 @@ void InitApp(void)
               UART_RX_OVERRUN_CLEAR,
               //(FCY / (16 * 9600)) - 1);
               25);*/
-    TRISB = 0xFE;
+    TRISB = 0xFFFE;
 
     /* Init I2C peripherals */
     CloseI2C1();
-    //DisableIntI2C1();
-    OpenI2C1(I2C_MASTER, 0, 39, 0, I2C_MSSP_ENABLE, I2C_SLEW_OFF|I2C_SMBUS_DISABLE);
-    /*IdleI2C1();
-    StartI2C1();*/
+    ConfigIntI2C1(I2C_INT_OFF);
+    IEC1bits.SSP1IE = 0;
+    OpenI2C1(I2C_MSSP_ENABLE & I2C_MASTER,
+             I2C_GEN_CALL_DISABLE & I2C_ACK_ENABLE & I2C_RECEIVE_ENABLE & I2C_STOP_ENABLE & I2C_REP_START_ENABLE & I2C_MASTR_START_ENABLE,
+             159, 0, 0, I2C_SLEW_ON & I2C_SMBUS_DISABLE);
+    IdleI2C1();
     I2C1_Clear_Intr_Status_Bit;
 
-    /*initAccelerometer();
-    initMagnetometer();
+    initAccelerometer();
+    /*initMagnetometer();
     initGyroscope();*/
 }
 
@@ -234,6 +237,7 @@ char i2c_data[10];
 void send_i2c_cmd(char size)
 {
     int i;
+    //IdleI2C1();
     StartI2C1(); // Start condition
     IdleI2C1();
     for (i = 0; i <= size; i++) {
@@ -241,6 +245,7 @@ void send_i2c_cmd(char size)
         IdleI2C1();
     }
     StopI2C1(); // Stop condition I2C on bus
+    IdleI2C1();
 }
 
 /* Addr must be in i2c_data[0] and register in i2c_data[1]. Result in i2c_data */
@@ -257,16 +262,17 @@ void recv_i2c_cmd(char size)
     IdleI2C1();
     WriteI2C1(i2c_data[0] + 1);
     IdleI2C1();
-    for (i = 0; i <= size; i++) {
+    for (i = 0; i < size; i++) {
         i2c_data[i] = ReadI2C1();
-        IdleI2C1();
         if (i < size - 1) {
             AckI2C1();
+            IdleI2C1();
         }
     }
     NotAckI2C1();
     IdleI2C1();
     StopI2C1(); // Stop condition I2C on bus
+    IdleI2C1();
 }
 
 void initAccelerometer()

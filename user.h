@@ -4,7 +4,6 @@
 /* User Level #define Macros                                                  */
 /******************************************************************************/
 
-
 // Sensor I2C addresses
 #define ACCEL_ADDRESS ((int) 0x53) // 0x53 = 0xA6 / 2
 #define MAGN_ADDRESS  ((int) 0x1E) // 0x1E = 0x3C / 2

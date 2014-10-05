@@ -17,6 +17,7 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <stdio.h>
 #include <uart.h>
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
@@ -51,24 +52,22 @@ int16_t main(void)
     {
         /*if (GPSState == GPS_READY) {
             //processGPS(GPSRPtr);
-            //writeStringToLogger(GPSRPtr, GPSWPtr - GPSRPtr);
+            //loggerWriteString(GPSRPtr, GPSWPtr - GPSRPtr);
             Nop();
         }*/
-        //getAccelerometer();
-        //getMagnetometer();
-        //getGyroscope();
-        char data[20] = "PUUZ, bonjour!\n\0";
-        char data2[20] = "UUUUUUUUUUUUUUUUUUUU";
-        /*int i = 0;
-        for (i = 0; i < 0xFF; i++) {
-            data[0] = i;
-            loggerWriteString(data, 1);
-        }*/
-        //memcpy(data, "\x55\xAA\x55\xAA\0", 5);
-        //memcpy(data, "\xFF\xFF\xFF\xFF\xFF", 5);
-        //memcpy(data, "\x00\x00\x00\x00\x00", 5);
-        loggerWriteString(data, 15);
-        loggerWriteString(data2, 15);
+        struct axis data;
+        char buffer[31];
+        data = getAccelerometer();
+        sprintf(buffer, "Accel: %i, %i, %i\n", data.x, data.y, data.z);
+        loggerWriteString(buffer, 30);
+        /*data = getMagnetometer();
+        loggerWriteString("\nMagneto: ", 10);
+        loggerWriteString(buffer, 6);
+        data = getGyroscope();
+        loggerWriteString("\nGyro: ", 7);
+        loggerWriteString(buffer, 6);*/
+        loggerWriteString("\n", 1);
+
         __delay_ms(500);
         Nop();
     }
