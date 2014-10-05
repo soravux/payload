@@ -21,7 +21,8 @@
 
 #include "user.h"            /* variables/params used by user.c */
 #include "system.h"
-#include <libpic30.h>
+
+#include <libpic30.h>        /* __delay_XX() */
 #include <uart.h>
 #include <string.h>
 #include <i2c.h>
@@ -42,13 +43,15 @@ void initGyroscope();
 void InitApp(void)
 {
     /* Setup analog functionality and port direction */
-    CloseUART1();
-    CloseUART1();
+    //CloseUART1();
+    //CloseUART2();
     ANSB = 0x00;
 
     /* Initialize peripherals */
-    ConfigIntUART1(UART_RX_INT_EN &
+    /*ConfigIntUART1(UART_RX_INT_EN &
                    UART_RX_INT_PR4 &
+                   UART_TX_INT_DIS);*/ /* USE this with GPS */
+    ConfigIntUART1(UART_RX_INT_DIS &
                    UART_TX_INT_DIS);
     ConfigIntUART2(UART_RX_INT_DIS &
                    UART_TX_INT_DIS);
@@ -77,8 +80,8 @@ void InitApp(void)
                                    //BRG=0x1A0 for 9600baud
                                    //BRG=0x010 for 230Kbaud
     /* Init SD Card Writer */
-    OpenUART2(UART_EN &
-              UART_IDLE_CON &
+    /*OpenUART2(UART_EN &
+              UART_IDLE_STOP &
               UART_DIS_WAKE &
               UART_DIS_LOOPBACK &
               UART_DIS_ABAUD &
@@ -88,27 +91,30 @@ void InitApp(void)
               UART_MODE_SIMPLEX &
               UART_UEN_00 &            //U1TX AND U1RX pins only
               UART_UXRX_IDLE_ONE &
-              UART_BRGH_FOUR,
+              UART_BRGH_SIXTEEN,
               UART_INT_TX_EACH_CHAR &
               UART_IrDA_POL_INV_ONE &
               UART_SYNC_BREAK_DISABLED &
               UART_TX_ENABLE &
               //UART_INT_RX_CHAR &
               UART_ADR_DETECT_DIS &
+              UART_RX_INT_DIS &
               UART_RX_OVERRUN_CLEAR,
-              FCY / (4 * 9600) - 1);
+              //(FCY / (16 * 9600)) - 1);
+              25);*/
+    TRISB = 0xFE;
 
     /* Init I2C peripherals */
     CloseI2C1();
     //DisableIntI2C1();
     OpenI2C1(I2C_MASTER, 0, 39, 0, I2C_MSSP_ENABLE, I2C_SLEW_OFF|I2C_SMBUS_DISABLE);
-    IdleI2C1();
-    StartI2C1();
+    /*IdleI2C1();
+    StartI2C1();*/
     I2C1_Clear_Intr_Status_Bit;
 
-    initAccelerometer();
+    /*initAccelerometer();
     initMagnetometer();
-    initGyroscope();
+    initGyroscope();*/
 }
 
 struct GPS_Text processGPS(char* inData)
@@ -159,18 +165,23 @@ struct GPS_Text processGPS(char* inData)
 void loggerEnterCommandMode()
 {
     /* Entering 3x CTRL+Z (26) will enter command mode */
-    putcUART2(26);
-    putcUART2(26);
-    putcUART2(26);
+    WriteUART2(26);
+    while (BusyUART2());
+    WriteUART2(26);
+    while (BusyUART2());
+    WriteUART2(26);
+    while (BusyUART2());
     __delay_ms(5);
     // TODO: check if mode has been changed.
-    //putcUART2(26);
+    //WriteUART2(26);
+    //while (BusyUART2());
 }
 
 void loggerLeaveCommandMode()
 {
     /* In Command Mode, CTRL+Z will return in */
-    putcUART2(26);
+    WriteUART2(26);
+    while (BusyUART2());
     // TODO: check if mode has been changed.
 }
 
@@ -184,10 +195,30 @@ void loggerChangeFile(char *filename, int len)
 
 void loggerWriteString(char *data, int len)
 {
-    int i;
+    int i, j;
+    /*while (BusyUART2());
     for (i = 0; i < len; ++i) {
-        putcUART2(data[i]);
+        WriteUART2(data[i]);
+        while (BusyUART2());
+    }*/
+
+    #define BIT __delay_us(102);
+
+    for (j = 0; j < len; ++j) {
+
+        PORTBbits.RB0 = 0;
+        BIT
+
+        for (i = 0; i < 8; ++i) {
+            PORTBbits.RB0 = 0x01 & (data[j] >> i);
+            BIT
+        }
+
+        PORTBbits.RB0 = 1;
+        BIT
+        BIT
     }
+
 }
 
 /* I2C-related code: IMU, Barometer, etc. */

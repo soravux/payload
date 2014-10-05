@@ -37,10 +37,12 @@ Refer to the C Compiler for PIC24 MCUs and dsPIC DSCs User Guide in the
 compiler installation directory /doc folder for documentation on the
 __builtin functions. */
 
-/* TODO Add clock switching code if appropriate.  An example stub is below.   */
 void ConfigureOscillator(void)
 {
-    CLKDIVbits.RCDIV = 0;
+    OSCCON = 0x0000;
+    CLKDIV = 0x0000;
+    OSCTUN = 0x0000;
+    //CLKDIVbits.RCDIV = 0;
 
 #if 0
 

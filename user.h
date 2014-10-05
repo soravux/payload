@@ -58,8 +58,17 @@ struct axis {
     int16_t z;
 };
 
+/* Generic functions */
 
 void InitApp(void);         /* I/O and Peripheral Initialization */
+
+
+/* Logger functions */
+
+void loggerWriteString(char *data, int len);
+
+/* Sensors functions */
+
 struct GPS_Text processGPS(char* inData);
 struct axis getAccelerometer();
 struct axis getMagnetometer();

@@ -22,6 +22,12 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
 
+/* This block must be after previous includes, otherwise __delay_XX doesn't work */
+#include <libpic30.h>        /* __delay_XX() */
+#include <uart.h>
+#include <string.h>
+#include <i2c.h>
+
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
@@ -43,14 +49,27 @@ int16_t main(void)
 
     while(1)
     {
-        if (GPSState == GPS_READY) {
+        /*if (GPSState == GPS_READY) {
             //processGPS(GPSRPtr);
             //writeStringToLogger(GPSRPtr, GPSWPtr - GPSRPtr);
             Nop();
-        }
-        getAccelerometer();
-        getMagnetometer();
-        getGyroscope();
+        }*/
+        //getAccelerometer();
+        //getMagnetometer();
+        //getGyroscope();
+        char data[20] = "PUUZ, bonjour!\n\0";
+        char data2[20] = "UUUUUUUUUUUUUUUUUUUU";
+        /*int i = 0;
+        for (i = 0; i < 0xFF; i++) {
+            data[0] = i;
+            loggerWriteString(data, 1);
+        }*/
+        //memcpy(data, "\x55\xAA\x55\xAA\0", 5);
+        //memcpy(data, "\xFF\xFF\xFF\xFF\xFF", 5);
+        //memcpy(data, "\x00\x00\x00\x00\x00", 5);
+        loggerWriteString(data, 15);
+        loggerWriteString(data2, 15);
+        __delay_ms(500);
         Nop();
     }
 }
