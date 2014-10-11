@@ -17,10 +17,11 @@ def parseFile(filename):
     for line in raw_data:
         key, value = line.decode('utf-8', 'replace').split(":", maxsplit=1)
         key = str(key.strip())
+        ts, key = key.split("|")
         if key not in ("Accel", "Gyro", "Magneto"):
             print("Could not process line: ", line)
             continue
-        data[key].append([float(re.sub("[^0-9-.]", "", x.strip())) for x in value.split(',')])
+        data[key].append([int(ts)] + [float(re.sub("[^0-9-.]", "", x.strip())) for x in value.split(',')])
     return data
 
 

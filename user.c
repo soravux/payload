@@ -238,7 +238,7 @@ void loggerWriteString(char *data, int maxlen)
 
 /* I2C-related code: IMU, Barometer, etc. */
 /* This definition is here because in the .h it is ends up being defined multiple times */
-char i2c_data[10];
+char i2c_data[30];
 
 
 /* IMU-related code. Highly inspired by:
@@ -290,33 +290,37 @@ void recv_i2c_cmd(char size)
 void initAccelerometer()
 {
     i2c_data[0] = ACCEL_ADDRESS;
-    /* Power register: Measurement mode */
-    memcpy(i2c_data + 1, "\x2D\x08", 2);
-    send_i2c_cmd(3);
-    __delay_ms(5);
     /* Data format register: Full resolution */
-    memcpy(i2c_data + 1, "\x31\x08", 2);
+    memcpy(i2c_data + 1, "\x31\x00", 2);
+    // LSB: 00 = ± 2g, 01 = ±4g, 10 = ±8g, 11 = ±16g
     send_i2c_cmd(3);
     __delay_ms(5);
     /* Rate: 50Hz, normal operation */
     memcpy(i2c_data + 1, "\x2C\x09", 2);
     send_i2c_cmd(3);
     __delay_ms(5);
+
+    /* Power register: Measurement mode */
+    memcpy(i2c_data + 1, "\x2D\x08", 2);
+    send_i2c_cmd(3);
+    __delay_ms(5);
+
 }
 
 /* Chip model: ADXL345 */
 struct axis getAccelerometer()
 {
     struct axis ret_val;
+
     i2c_data[0] = ACCEL_ADDRESS;
     i2c_data[1] = 0x32;
 
     recv_i2c_cmd(6);
 
     // LSB first
-    ret_val.x = (((int16_t)i2c_data[1]) << 8) | i2c_data[0];
-    ret_val.y = (((int16_t)i2c_data[3]) << 8) | i2c_data[2];
-    ret_val.z = (((int16_t)i2c_data[5]) << 8) | i2c_data[4];
+    ret_val.x = (((int16_t)i2c_data[1]) << 8) | (int16_t)i2c_data[0];
+    ret_val.y = (((int16_t)i2c_data[3]) << 8) | (int16_t)i2c_data[2];
+    ret_val.z = (((int16_t)i2c_data[5]) << 8) | (int16_t)i2c_data[4];
 
     return ret_val;
 }
