@@ -16,19 +16,20 @@ def parseFile(filename):
 
     for line in raw_data:
         key, value = line.decode('utf-8', 'replace').split(":", maxsplit=1)
-        key = str(key.strip())
+        ts, key = (x.strip() for x in key.split("|", maxsplit=1))
         if key not in ("Accel", "Gyro", "Magneto"):
             print("Could not process line: ", line)
             continue
-        data[key].append([float(re.sub("[^0-9-.]", "", x.strip())) for x in value.split(',')])
+        try:
+            data[key].append([float(re.sub("[^0-9-.]", "", x.strip())) for x in value.split(',')])
+        except ValueError:
+            print("Could not convert values to float on line: ", line)
     return data
 
 
 def plotData(data):
     for key, value in data.items():
-        print(key)
         for axis in zip(*value):
-            print(axis)
             plt.plot(axis)
         plt.savefig('{}.png'.format(key))
         plt.clf()
