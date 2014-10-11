@@ -19,6 +19,7 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include <stdio.h>
 #include <uart.h>
+#include <time.h>
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
@@ -42,32 +43,41 @@
 
 int16_t main(void)
 {
+    int i;
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
     /* Initialize IO ports and peripherals */
+
+    for (i = 0; i < 50; ++i) {
+        __delay_ms(100);
+    }
     InitApp();
 
-    while(1)
+    __delay_ms(100);
+
+    char buffer[31];
+    struct axis data;
+
+    while (1)
     {
         /*if (GPSState == GPS_READY) {
             //processGPS(GPSRPtr);
             //loggerWriteString(GPSRPtr, GPSWPtr - GPSRPtr);
             Nop();
         }*/
-        struct axis data;
-        char buffer[31];
+        
         data = getAccelerometer();
-        sprintf(buffer, "Accel: %i, %i, %i\n", data.x, data.y, data.z);
+        sprintf(buffer, "%u|Accel: %i, %i, %i\n", (uint16_t)time(NULL), data.x, data.y, data.z);
         loggerWriteString(buffer, 30);
         data = getMagnetometer();
-        sprintf(buffer, "Magneto: %i, %i, %i\n", data.x, data.y, data.z);
+        sprintf(buffer, "%u|Magneto: %i, %i, %i\n", (uint16_t)time(NULL), data.x, data.y, data.z);
         loggerWriteString(buffer, 30);
         data = getGyroscope();
-        sprintf(buffer, "Gyro: %i, %i, %i\n", data.x, data.y, data.z);
+        sprintf(buffer, "%u|Gyro: %i, %i, %i\n", (uint16_t)time(NULL), data.x, data.y, data.z);
         loggerWriteString(buffer, 30);
 
-        __delay_ms(500);
+        __delay_ms(20);
         Nop();
     }
 }
